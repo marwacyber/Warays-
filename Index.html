@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>A Special Surprise For You ✨</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ==========================================================================
+           1. CSS VARIABLES & THEMES
+           ========================================================================== */
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f0c20 0%, #1a0926 50%, #0b0712 100%);
+            --accent: #ff4b72;
+            --accent-glow: rgba(255, 75, 114, 0.5);
+            --card-bg: rgba(26, 15, 38, 0.85); /* Recorder-optimized */
+            --card-border: rgba(255, 255, 255, 0.18);
+            --text-main: #f0f3f9;
+            --text-muted: #b3bac6;
+            --font-title: 'Dancing Script', cursive;
+            --font-body: 'Plus Jakarta Sans', sans-serif;
+            --radius-lg: 28px;
+            --radius-md: 18px;
+            --radius-sm: 12px;
+        }
+
+        /* ==========================================================================
+           2. RESET & BASE LAYOUT
+           ========================================================================== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-main);
+            font-family: var(--font-body);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            line-height: 1.6;
+        }
+
+        /* Background Floating Particles */
+        #particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .floating-particle {
+            position: absolute;
+            bottom: -50px;
+            font-size: 1.2rem;
+            opacity: 0.6;
+            animation: floatUp linear infinite;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) rotate(0deg) scale(0.8);
+                opacity: 0;
+            }
+            20% { opacity: 0.8; }
+            80% { opacity: 0.8; }
+            100% {
+                transform: translateY(-110vh) rotate(360deg) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        /* App Wrapper */
+        .app-wrapper {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+            padding: 20px 16px 90px;
+        }
+
+        /* ==========================================================================
+           3. PROMINENT MUSIC PLAYER BUTTON
+           ========================================================================== */
+        .music-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 999;
+            background: var(--accent);
+            color: #fff;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            padding: 10px 18px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 0.88rem;
+            cursor: pointer;
+            box-shadow: 0 0 20px var(--accent-glow), 0 4px 15px rgba(0,0,0,0.4);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: pulseGlow 2.5s infinite ease-in-out;
+        }
+
+        .music-btn:active {
+            transform: scale(0.92);
+        }
+
+        .music-icon {
+            font-size: 1.1rem;
+            animation: spinMusic 4s linear infinite;
+            animation-play-state: paused;
+        }
+
+        .music-btn.playing .music-icon {
+            animation-play-state: running;
+        }
+
+        @keyframes spinMusic {
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 15px var(--accent-glow); }
+            50% { box-shadow: 0 0 30px var(--accent-glow), 0 0 10px var(--accent); }
+        }
+
+        /* Progress Bar Indicator */
+        .progress-bar-container {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--accent);
+            transition: width 0.4s ease;
+            box-shadow: 0 0 8px var(--accent);
+        }
+
+        /* ==========================================================================
+           4. MULTI-STEP LINEAR SCREEN SYSTEM
+           ========================================================================== */
+        .page {
+            display: none;
+            opacity: 0;
+            transform: translateY(18px) scale(0.97);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            width: 100%;
+        }
+
+        .page.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* Responsive Card Design */
+        .glass-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 28px 22px;
+            margin-bottom: 20px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section-tag {
+            display: inline-block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent);
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .section-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            line-height: 1.3;
+        }
+
+        /* Action Buttons */
+        .action-btn {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 15px 28px;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 8px 20px var(--accent-glow);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .action-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* ==========================================================================
+           5. SPECIFIC PAGE STYLES
+           ========================================================================== */
+        .intro-flex {
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .envelope-wrapper {
+            position: relative;
+            cursor: pointer;
+            margin: 30px 0;
+            animation: pulseEnvelope 2s infinite ease-in-out;
+        }
+
+        .envelope-icon {
+            width: 110px;
+            height: 110px;
+            background: var(--card-bg);
+            border: 2px solid var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            box-shadow: 0 0 35px var(--accent-glow);
+        }
+
+        @keyframes pulseEnvelope {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.06); }
+        }
+
+        .intro-title {
+            font-family: var(--font-title);
+            font-size: 3.2rem;
+            color: var(--accent);
+            margin-bottom: 6px;
+            text-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .memory-item {
+            position: relative;
+            padding-left: 20px;
+            border-left: 2px solid var(--card-border);
+            margin-bottom: 22px;
+        }
+
+        .memory-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .memory-item::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 4px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        .memory-title {
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+
+        .memory-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .quiz-option {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            padding: 16px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.95rem;
+        }
+
+        .quiz-option:active {
+            transform: scale(0.98);
+        }
+
+        .quiz-feedback {
+            margin-top: 14px;
+            padding: 14px;
+            border-radius: var(--radius-sm);
+            background: var(--accent-glow);
+            color: var(--text-main);
+            font-size: 0.9rem;
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .lock-container {
+            text-align: center;
+        }
+
+        .lock-icon {
+            font-size: 3.5rem;
+            margin: 15px 0;
+            cursor: pointer;
+            display: inline-block;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .secret-content {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.8s ease, opacity 0.6s ease, margin-top 0.4s ease;
+        }
+
+        .secret-content.unlocked {
+            max-height: 1200px;
+            opacity: 1;
+            margin-top: 20px;
+        }
+
+        .letter-paper {
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px dashed var(--accent);
+            padding: 22px;
+            border-radius: var(--radius-md);
+            text-align: left;
+            white-space: pre-line;
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        .notes-grid {
+            display: grid;
+            gap: 14px;
+        }
+
+        .note-box {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: var(--radius-md);
+            padding: 18px;
+            border-left: 3px solid var(--accent);
+        }
+
+        .note-box h4 {
+            font-size: 0.95rem;
+            color: var(--accent);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .note-box p {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+        }
+
+        .reply-textarea {
+            width: 100%;
+            height: 120px;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+            color: var(--text-main);
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            resize: none;
+            margin-bottom: 16px;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .reply-textarea:focus {
+            border-color: var(--accent);
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-top: 30px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background Floating Particles -->
+    <div id="particles-container"></div>
+
+    <!-- Floating Music Button -->
+    <button class="music-btn" id="musicToggle" aria-label="Toggle Romantic Music">
+        <span class="music-icon">🎵</span>
+        <span id="musicBtnText">Play Music</span>
+    </button>
+
+    <div class="app-wrapper">
+
+        <!-- Progress Indicator -->
+        <div class="progress-bar-container" id="progressBar">
+            <div class="progress-bar-fill" id="progressFill"></div>
+        </div>
+
+        <!-- STEP 1: OPENING SURPRISE SCREEN -->
+        <section class="page active" id="step-1">
+            <div class="intro-flex">
+                <div class="section-tag" id="introSubtitle">A Special Experience</div>
+                <h1 class="intro-title">For Warays</h1>
+                
+                <div class="envelope-wrapper" id="envelopeBtn">
+                    <div class="envelope-icon" id="introEmoji">💌</div>
+                </div>
+
+                <p style="color: var(--text-muted); font-size: 0.92rem; margin-bottom: 24px;" id="introPrompt">
+                    Tap the envelope to open ur surprise
+                </p>
+
+                <button class="action-btn" onclick="nextStep()">
+                    Open Surprise ✨
+                </button>
+            </div>
+        </section>
+
+        <!-- STEP 2: WELCOME INTRO -->
+        <section class="page" id="step-2">
+            <div class="glass-card text-center" style="text-align: center;">
+                <div style="font-size: 2.8rem; margin-bottom: 10px;" id="welcomeEmoji">💖</div>
+                <span class="section-tag">Karibu Kipnz</span>
+                <h2 class="section-title">Hey Warays ✨</h2>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px;" id="welcomeMessage">
+                    I made this tiny digital space coz yu deserve something really nyc and special. Nakupenda kipnz! I prepared a few cards just for yu to unlock step-by-step.
+                </p>
+
+                <button class="action-btn" onclick="nextStep()">
+                    Next Card ✨
+                </button>
+            </div>
+        </section>
+
+        <!-- STEP 3: MEMORIES & VIBES -->
+        <section class="page" id="step-3">
+            <div class="glass-card">
+                <span class="section-tag">Chapter 1</span>
+                <h2 class="section-title">Little Things I Cherish ✨</h2>
+                <div id="memoriesList"></div>
+            </div>
+
+            <button class="action-btn" onclick="nextStep()">
+                Next Card ✨
+            </button>
+        </section>
+
+        <!-- STEP 4: MINI QUIZ -->
+        <section class="page" id="step-4">
+            <div class="glass-card">
+                <span class="section-tag">Chapter 2</span>
+                <h2 class="section-title">A Cute Mini Quiz 🧩</h2>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 18px;" id="quizQuestion">
+                    Loading question...
+                </p>
+                <div id="quizOptions"></div>
+                <div class="quiz-feedback" id="quizFeedback"></div>
+            </div>
+
+            <button class="action-btn" id="quizNextBtn" onclick="nextStep()" style="display: none;">
+                Next Card ✨
+            </button>
+        </section>
+
+        <!-- STEP 5: SECRET LOCK & REVEAL -->
+        <section class="page" id="step-5">
+            <div class="glass-card lock-container">
+                <span class="section-tag">Chapter 3</span>
+                <h2 class="section-title">A Hidden Note 🔐</h2>
+                <p style="color: var(--text-muted); font-size: 0.88rem;">Tap the lock below to reveal what's inside</p>
+                
+                <div class="lock-icon" id="lockBtn">🔒</div>
+
+                <div class="secret-content" id="secretContent">
+                    <div class="letter-paper" id="secretLetter"></div>
+                </div>
+            </div>
+
+            <button class="action-btn" id="secretNextBtn" onclick="nextStep()" style="display: none; margin-top: 15px;">
+                Next Card ✨
+            </button>
+        </section>
+
+        <!-- STEP 6: HEARTFELT NOTES -->
+        <section class="page" id="step-6">
+            <div class="glass-card">
+                <span class="section-tag">Chapter 4</span>
+                <h2 class="section-title">From My Heart 💭</h2>
+                <div class="notes-grid" id="notesGrid"></div>
+            </div>
+
+            <button class="action-btn" onclick="nextStep()">
+                Final Step ✨
+            </button>
+        </section>
+
+        <!-- STEP 7: REPLY SECTION -->
+        <section class="page" id="step-7">
+            <div class="glass-card">
+                <span class="section-tag">Final Chapter</span>
+                <h2 class="section-title">Leave a Message 💌</h2>
+                <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 14px;">
+                    Send Maher a quick note directly to WhatsApp or my inbox!
+                </p>
+                <textarea class="reply-textarea" id="replyText" placeholder="Write ur thoughts or message here..."></textarea>
+                <button class="action-btn" id="sendReplyBtn">
+                    <span>Send to Maher</span> ✨
+                </button>
+            </div>
+
+            <footer class="footer">
+                Made with ❤️ for Warays
+            </footer>
+        </section>
+
+    </div>
+
+    <!-- APP ENGINE & LOGIC SCRIPT -->
+    <script>
+        const CONFIG = {
+            name: "Warays",
+            from: "Maher",
+            emoji: "🌹",
+            introSubtitle: "A Special Experience",
+            introPrompt: "Tap the envelope to open ur surprise",
+            welcomeMessage: "I made this tiny digital space coz yu deserve something really nyc and special. Nakupenda kipnz! I prepared a few cards just for yu to unlock step-by-step.",
+
+            memories: [
+                {
+                    title: "That First Impression 😊",
+                    desc: "From the moment we started talking, ur vibe stood out completely. Yu instantly brightened my day coz ur energy is just so nyc."
+                },
+                {
+                    title: "Ur Amazing Vibe ✨",
+                    desc: "Whether we talk about silly things or deep stuff, chatting with yu is always the best part of my day. Nakupenda kipnz!"
+                },
+                {
+                    title: "Little Things I Notice 🌸",
+                    desc: "The way yu speak about things yu love lyk no one else is watching. Ur humor and passion are so genuinely refreshing."
+                }
+            ],
+
+            quiz: {
+                question: "Quick question: What's the best way to make any day 10x better?",
+                options: [
+                    { text: "A nice cup of coffee or tea", feedback: "Classic choice! But there's something even better... 👀" },
+                    { text: "Getting a text message from yu", feedback: "Correct answer! It brightens everything instantly coz yu are special! ✨" },
+                    { text: "Sleeping in all day", feedback: "Very tempting, but chatting with yu still wins! 😉" }
+                ]
+            },
+
+            secretLetter: `Dear Warays,\n\nI wanted to make something different and personal just for yu.\n\nYu are genuinely incredible, and having yu around makes everything feel warmer and brighter. Nakupenda kipnz, thank yu for simply being who yu are.\n\nHere is a little promise: Whenever yu need someone to listen, share a laugh, or just hang out, I am always here for yu. ✨\n\nWith love,\nMaher`,
+
+            notes: [
+                {
+                    icon: "🌟",
+                    title: "Appreciation",
+                    text: "I really appreciate how easy and natural it feels to talk to yu. Ur presence is just so calm and nyc."
+                },
+                {
+                    icon: "🌸",
+                    title: "Encouragement",
+                    text: "Whatever goals or dreams yu are working on right now, I am cheering for yu every step of the way!"
+                },
+                {
+                    icon: "✨",
+                    title: "Future Hopes",
+                    text: "I hope we get to share many more amazing conversations, laughs, and awesome moments together."
+                }
+            ],
+
+            // Active Endpoints
+            formspreeEndpoint: "https://formspree.io/f/xbdnyenr", 
+            whatsappNumber: "255695815741" 
+        };
+
+        let currentStep = 1;
+        const totalSteps = 7;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            renderContent();
+            setupEventListeners();
+            generateParticles();
+        });
+
+        function renderContent() {
+            document.getElementById("introSubtitle").innerText = CONFIG.introSubtitle;
+            document.getElementById("introEmoji").innerText = CONFIG.emoji;
+            document.getElementById("introPrompt").innerText = CONFIG.introPrompt;
+
+            document.getElementById("welcomeEmoji").innerText = CONFIG.emoji;
+            document.getElementById("welcomeMessage").innerText = CONFIG.welcomeMessage;
+
+            const memoriesContainer = document.getElementById("memoriesList");
+            memoriesContainer.innerHTML = CONFIG.memories.map(m => `
+                <div class="memory-item">
+                    <div class="memory-title">${m.title}</div>
+                    <div class="memory-desc">${m.desc}</div>
+                </div>
+            `).join('');
+
+            document.getElementById("quizQuestion").innerText = CONFIG.quiz.question;
+            const quizContainer = document.getElementById("quizOptions");
+            quizContainer.innerHTML = CONFIG.quiz.options.map((opt, index) => `
+                <div class="quiz-option" onclick="handleQuizClick(${index})">
+                    <span>${opt.text}</span>
+                    <span>✨</span>
+                </div>
+            `).join('');
+
+            document.getElementById("secretLetter").innerText = CONFIG.secretLetter;
+
+            const notesContainer = document.getElementById("notesGrid");
+            notesContainer.innerHTML = CONFIG.notes.map(n => `
+                <div class="note-box">
+                    <h4><span>${n.icon}</span> ${n.title}</h4>
+                    <p>${n.text}</p>
+                </div>
+            `).join('');
+
+            const sendBtn = document.getElementById("sendReplyBtn");
+            sendBtn.querySelector("span").innerText = `Send to ${CONFIG.from}`;
+        }
+
+        function nextStep() {
+            if (currentStep < totalSteps) {
+                const currentEl = document.getElementById(`step-${currentStep}`);
+                currentStep++;
+                const nextEl = document.getElementById(`step-${currentStep}`);
+
+                currentEl.classList.remove('active');
+                
+                setTimeout(() => {
+                    nextEl.classList.add('active');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    updateProgressBar();
+                    createHeartBurst();
+                }, 150);
+            }
+        }
+
+        function updateProgressBar() {
+            const barContainer = document.getElementById("progressBar");
+            const barFill = document.getElementById("progressFill");
+            
+            if (currentStep > 1) {
+                barContainer.style.display = "block";
+                const percentage = ((currentStep - 1) / (totalSteps - 1)) * 100;
+                barFill.style.width = `${percentage}%`;
+            }
+        }
+
+        function setupEventListeners() {
+            document.getElementById("envelopeBtn").addEventListener("click", () => {
+                if (!isAudioPlaying) {
+                    toggleMusic();
+                }
+                nextStep();
+            });
+
+            const lockBtn = document.getElementById("lockBtn");
+            const secretContent = document.getElementById("secretContent");
+            const secretNextBtn = document.getElementById("secretNextBtn");
+            let isUnlocked = false;
+
+            lockBtn.addEventListener("click", () => {
+                if (!isUnlocked) {
+                    isUnlocked = true;
+                    lockBtn.innerText = "🔓";
+                    lockBtn.style.transform = "scale(1.2) rotate(8deg)";
+                    secretContent.classList.add("unlocked");
+                    secretNextBtn.style.display = "inline-flex";
+                    createHeartBurst();
+                }
+            });
+
+            document.getElementById("musicToggle").addEventListener("click", toggleMusic);
+            document.getElementById("sendReplyBtn").addEventListener("click", handleReplySubmit);
+        }
+
+        function handleQuizClick(index) {
+            const feedbackEl = document.getElementById("quizFeedback");
+            const quizNextBtn = document.getElementById("quizNextBtn");
+            const selectedOpt = CONFIG.quiz.options[index];
+            
+            feedbackEl.innerText = selectedOpt.feedback;
+            feedbackEl.style.display = "block";
+            quizNextBtn.style.display = "inline-flex";
+            createHeartBurst();
+        }
+
+        // Dual Dispatch: Wait for Email to complete first, then launch WhatsApp with intact Emojis
+        async function handleReplySubmit() {
+            const text = document.getElementById("replyText").value.trim();
+            const btn = document.getElementById("sendReplyBtn");
+
+            if (!text) {
+                alert("Please write a small message first! 😊");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = `<span>Sending...</span> ✨`;
+
+            // 1. Send to Formspree email
+            if (CONFIG.formspreeEndpoint) {
+                try {
+                    await fetch(CONFIG.formspreeEndpoint, {
+                        method: "POST",
+                        headers: { 
+                            "Content-Type": "application/json",
+                            "Accept": "application/json"
+                        },
+                        body: JSON.stringify({
+                            from: CONFIG.name,
+                            to: CONFIG.from,
+                            message: text
+                        })
+                    });
+                } catch (e) {
+                    console.log("Formspree dispatch error:", e);
+                }
+            }
+
+            // 2. Open WhatsApp with properly encoded text (Emoji preservation)
+            if (CONFIG.whatsappNumber) {
+                const fullMsg = `Hey ${CONFIG.from}! ${text}`;
+                const encodedMsg = encodeURIComponent(fullMsg);
+                const waUrl = `https://wa.me/${CONFIG.whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodedMsg}`;
+                window.open(waUrl, '_blank');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = `<span>Sent Successfully!</span> ❤️`;
+        }
+
+        function generateParticles() {
+            const container = document.getElementById("particles-container");
+            const particleSymbols = [CONFIG.emoji, "✨", "💫", "🌸", "🤍"];
+
+            for (let i = 0; i < 16; i++) {
+                const particle = document.createElement("div");
+                particle.className = "floating-particle";
+                particle.innerText = particleSymbols[Math.floor(Math.random() * particleSymbols.length)];
+                
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.animationDuration = `${6 + Math.random() * 8}s`;
+                particle.style.animationDelay = `${Math.random() * 5}s`;
+                
+                container.appendChild(particle);
+            }
+        }
+
+        function createHeartBurst() {
+            for (let i = 0; i < 7; i++) {
+                const burst = document.createElement("div");
+                burst.innerText = CONFIG.emoji;
+                burst.style.position = "fixed";
+                burst.style.top = "50%";
+                burst.style.left = "50%";
+                burst.style.fontSize = "1.5rem";
+                burst.style.pointerEvents = "none";
+                burst.style.zIndex = "1000";
+                burst.style.transition = "all 0.8s ease-out";
+                
+                document.body.appendChild(burst);
+
+                setTimeout(() => {
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = 50 + Math.random() * 80;
+                    const x = Math.cos(angle) * dist;
+                    const y = Math.sin(angle) * dist;
+                    
+                    burst.style.transform = `translate(${x}px, ${y}px) scale(0)`;
+                    burst.style.opacity = "0";
+                }, 20);
+
+                setTimeout(() => burst.remove(), 850);
+            }
+        }
+
+        // Web Audio Synth Melody Engine
+        let audioCtx, musicInterval, isAudioPlaying = false;
+
+        function toggleMusic() {
+            const musicBtn = document.getElementById("musicToggle");
+            const musicBtnText = document.getElementById("musicBtnText");
+
+            if (!isAudioPlaying) {
+                playRomanticMelody();
+                musicBtn.classList.add("playing");
+                musicBtnText.innerText = "Pause Music";
+                isAudioPlaying = true;
+            } else {
+                stopRomanticMelody();
+                musicBtn.classList.remove("playing");
+                musicBtnText.innerText = "Play Music";
+                isAudioPlaying = false;
+            }
+        }
+
+        function playRomanticMelody() {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            
+            if (!audioCtx) {
+                audioCtx = new AudioContext();
+            } else if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const chords = [
+                [207.65, 261.63, 311.13, 392.00], 
+                [174.61, 207.65, 261.63, 311.13], 
+                [138.59, 174.61, 207.65, 261.63], 
+                [155.56, 196.00, 233.08, 311.13]  
+            ];
+            
+            let chordIdx = 0;
+
+            function playChord() {
+                if (!audioCtx || audioCtx.state === 'closed') return;
+
+                const currentNotes = chords[chordIdx % chords.length];
+                
+                currentNotes.forEach((freq, i) => {
+                    setTimeout(() => {
+                        if (!audioCtx || audioCtx.state === 'closed' || !isAudioPlaying) return;
+
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        
+                        osc.type = 'sine';
+                        osc.frequency.value = freq;
+                        
+                        gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.04, audioCtx.currentTime + 0.6);
+                        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 3.2);
+                        
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        
+                        osc.start();
+                        osc.stop(audioCtx.currentTime + 3.4);
+                    }, i * 220);
+                });
+
+                chordIdx++;
+            }
+
+            playChord();
+            musicInterval = setInterval(playChord, 2600);
+        }
+
+        function stopRomanticMelody() {
+            if (musicInterval) clearInterval(musicInterval);
+            if (audioCtx && audioCtx.state === 'running') {
+                audioCtx.suspend();
+            }
+        }
+    </script>
+</body>
+</html>
